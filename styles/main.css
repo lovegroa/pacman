@@ -1,0 +1,77 @@
+
+html, body {
+
+height: 100%;
+margin: 0px;
+
+}
+
+body{
+
+display: flex;
+justify-content: center;
+align-items: center;
+
+}
+
+#main-container {
+
+  max-width: 800px;
+  width: 70%;
+  height: 80%;
+
+
+}
+
+#header-container {
+
+  height: 20%;
+
+}
+
+#middle-container {
+
+  height: 80%;
+  display: flex;
+
+}
+
+#game-container {
+
+  width: 60%;
+  display: grid;
+  grid-template-columns: repeat(29, 1fr);
+  grid-template-rows: repeat(29, 1fr);
+  background-color: black;
+
+
+
+}
+
+#score-container {
+
+  width: 40%;
+
+}
+
+
+.cell{
+
+  grid-column-end: span 1;
+  grid-row-end: span 1;
+
+}
+
+.block{
+
+  background-color: blue;
+
+}
+
+div {
+
+  border: 1px solid red;
+
+
+}
+
