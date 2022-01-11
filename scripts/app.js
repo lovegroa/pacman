@@ -109,6 +109,7 @@ function init() {
   sprites.push(pacman)
   const ghost1 = new Sprite('ghost1', 'ghost1', 'chase', 'computer', 'null', 14, 14)
   sprites.push(ghost1)
+  const allCorners = []
 
   //Functions
 
@@ -204,6 +205,8 @@ function init() {
 
 
 
+
+
         tempCell.id = `r${row}-c${col}`
         tempCell.style.gridColumnStart = col + 1
         tempCell.style.gridRowStart = row + 1
@@ -251,6 +254,12 @@ function init() {
 
     }
 
+    sprites.forEach(sprite => {
+
+      gridArray[sprite.row][sprite.col][sprite.type] = true
+
+    })
+
   }
 
   function updateGrid() {
@@ -270,6 +279,8 @@ function init() {
 
             })
 
+            gridArray[row][col].cornerValue ? cell.innerText = gridArray[row][col].cornerValue : gridArray[row][col].cornerValue = ''
+            cell.innerText = gridArray[row][col].cornerValue
             gridArray[row][col].direction === 'right' ? cell.classList.add('right') : cell.classList.remove('right')
             gridArray[row][col].direction === 'left' ? cell.classList.add('left') : cell.classList.remove('left')
             gridArray[row][col].direction === 'up' ? cell.classList.add('up') : cell.classList.remove('up')
@@ -290,7 +301,7 @@ function init() {
   }
 
   function logKey(e) {
-    console.log(e.keyCode)
+    // console.log(e.keyCode)
     if (e.keyCode === 38) {
 
       pacman.nextMove = 'up'
@@ -368,7 +379,6 @@ function init() {
 
   function findCorners() {
 
-    let distance = 0
 
     //identify which cells are corners
 
@@ -402,15 +412,30 @@ function init() {
 
           if (cornerCount > 2) {
             gridArray[row][col].isCorner = true
+            allCorners.push([row, col])
           } else if (!((up && down) || (left && right))) {
 
             gridArray[row][col].isCorner = true
+            allCorners.push([row, col])
+
 
           }
 
         }
       }
     }
+
+
+    //identify which corners are connected
+
+    //loop through all corners to find shortest node value  
+
+  }
+
+  function findNearestCorners() {
+
+    let distance = 0
+
 
     //identify which corners are connected
 
@@ -440,7 +465,6 @@ function init() {
 
             let rowDistance = 0
             let colDistance = 0
-            let tunnel = false
             let operator
             let rowDistanceMultiplier = 0
             let colDistanceMultiplier = 0
@@ -470,7 +494,6 @@ function init() {
               if ((row === 14 && col > 24 && direction === 'right') || (row === 14 && col < 4 && direction === 'left')) {
                 // console.log(direction, row, col, 'tunnel')
 
-                tunnel = true
                 break
 
               } else {
@@ -510,39 +533,152 @@ function init() {
         }
       }
     }
-    //identify which corners are connected
 
-    //loop through all corners to find shortest node value  
+
+
 
   }
 
-  // function pathFind(startRow, startCol, endRow, EndCol) {
+  function measureCorners() {
+
+    // console.log(allCorners[0])
+
+    let allCornersValue = false
+    let runCount = 0
+
+    while (!allCornersValue) {
+      runCount += 1
+      console.log('the while loop has run:', runCount)
+
+
+      allCornersValue = true
+
+      allCorners.forEach(corner => {
+
+        const tempCorner = gridArray[corner[0]][corner[1]]
+
+        //checks to see if the current cell has a value
+
+        if (!tempCorner.cornerValue) {
+
+          allCornersValue = false
+
+          // if not it is set the lowest value of the connecting corners plus the distance if they have a value
+          let min = 1000
+          tempCorner.corners.forEach(tempCorner2 => {
+
+            //checks to see if those corners have a value
+
+            if (gridArray[tempCorner2.row][tempCorner2.col].cornerValue) {
+
+              //if they do and it's smaller than the min then the min is updated with that value plus distance
+
+              if (((gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance) < min)) {
+
+                min = gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance
+
+              }
+
+
+            }
 
 
 
-  // }
+          })
+
+          //then the min value is added as that corner value
+
+          if (min !== 1000) tempCorner.cornerValue = min
+          // console.log(`Corner value added to ${corner[0]}:${corner[1]} of ${tempCorner.cornerValue}`)
+
+        }
+
+      })
+
+    }
+
+    allCorners.forEach(corner => {
+
+      const tempCorner = gridArray[corner[0]][corner[1]]
+
+      //checks to see if the current cell has a value
+
+      if (!tempCorner.cornerValue) {
+
+        // if not it is set the lowest value of the connecting corners plus the distance if they have a value
+        let min = 10
+        tempCorner.corners.forEach(tempCorner2 => {
+
+          //checks to see if those corners have a value
+
+          if (gridArray[tempCorner2.row][tempCorner2.col].cornerValue) {
+
+            //if they do and it's smaller than the min then the min is updated with that value plus distance
+
+            if ((gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance) < min) {
+
+              min = gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance
+
+            }
+
+
+          }
+
+
+
+        })
+
+        //then the min value is added as that corner value
+
+        tempCorner.cornerValue = min
+        console.log(`Corner value added to ${tempCorner.row}:${tempCorner.col} of ${tempCorner.cornerValue}`)
+
+
+
+      }
+
+    })
+
+  }
+
+  function pathFind(endRow, EndCol) {
+
+    //adds the first node values to the corners nearest the end coords
+
+    gridArray[endRow][EndCol].corners.forEach(corner => {
+
+      gridArray[corner.row][corner.col].cornerValue = corner.distance
+      console.log(`Corner value added to ${corner.row}:${corner.col} of ${corner.distance}`)
+
+
+    })
+
+
+    measureCorners()
+
+  }
 
   //End Functions
 
   document.addEventListener('keydown', logKey)
-
   addBlockIds()
   startPauseBtn.addEventListener('click', startPause)
   createGrid()
   const cells = document.querySelectorAll('.cell')
   createGridArray()
-
-  sprites.forEach(sprite => {
-
-    gridArray[sprite.row][sprite.col][sprite.type] = true
-
-  })
-
+  findCorners()
+  findNearestCorners()
+  pathFind(pacman.row, pacman.col)
   updateGrid()
 
-  findCorners()
-  // console.log(gridArray[14][3])
+  console.log(gridArray[0][0])
 
 }
 
 window.addEventListener('DOMContentLoaded', init)
+
+
+//start at the end position, set any connected corners to the distance of end cell
+
+//run throught all of the corners, if they connect to a corner with a value they add that value to the distance and have a value
+//if there i
