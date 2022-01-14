@@ -110,6 +110,30 @@ function init() {
 
     }
 
+    cherry() {
+
+
+      allAudioTags = document.querySelectorAll('audio')
+      allAudioTags.forEach(tag => {
+
+        tag.volume = 0.1
+
+      })
+      playAudioOnce('assets/audio/run.wav')
+      sprites.forEach(sprite => sprite.run())
+
+      setTimeout(() => {
+
+        allAudioTags.forEach(tag => {
+
+          tag.volume = 1
+
+        })
+
+      }, 5000)
+
+    }
+
     capture() {
 
       gridArray[this.row][this.col][this.name] = false
@@ -173,7 +197,9 @@ function init() {
   let playerName = 'Current Score'
   let audioCount = 0
   let totalCoins = 0
+  let totalCherries = 0
   let cheat = 1
+  let allAudioTags
 
 
   if (!localStorage.getItem('scores')) {
@@ -368,6 +394,7 @@ function init() {
 
             gridArray[row][col].block ? cell.classList.add('block') : cell.classList.remove('block')
             gridArray[row][col].coin ? cell.classList.add('coin') : cell.classList.remove('coin')
+            gridArray[row][col].cherry ? cell.classList.add('cherry') : cell.classList.remove('cherry')
 
 
 
@@ -409,14 +436,22 @@ function init() {
 
                 if (gridArray[row][col][sprite.name] && gridArray[row][col].pacman) {
 
-                  pacman.capture()
+                  if (sprite.behaviour === 'chase') {
+
+                    pacman.capture()
+
+                  }
+
 
                 } else if (sprite.previousCol === pacman.col && sprite.previousRow === pacman.row && pacman.previousCol === sprite.col && sprite.previousRow === pacman.row) {
 
                   //prevents issue where pacman and ghost are moving in opposite directions and don't actually land on the same cell at the same time but cross paths!
                   //this checks to see if they have simply switched positions, which means they must have passed
-                  pacman.capture()
+                  if (sprite.behaviour === 'chase') {
 
+                    pacman.capture()
+
+                  }
                 }
               }
 
@@ -450,9 +485,22 @@ function init() {
 
             }
 
+            if (gridArray[row][col].pacman && gridArray[row][col].cherry) {
+
+              cell.classList.remove('cherry')
+              gridArray[row][col].cherry = false
+              totalCherries -= 1
+              pacman.cherry()
+
+            }
+
             if (totalCoins === 0) addCoins()
+            if (totalCherries === 0) addCherries()
+
 
             if (gridArray[row][col].coin) cell.classList.add('coin')
+            if (gridArray[row][col].cherry) cell.classList.add('cherry')
+
 
             sprites.forEach(sprite => {
 
@@ -461,6 +509,12 @@ function init() {
                 if (gridArray[row][col][sprite.name] && gridArray[row][col].coin) {
 
                   cell.classList.remove('coin')
+
+                }
+
+                if (gridArray[row][col][sprite.name] && gridArray[row][col].cherry) {
+
+                  cell.classList.remove('cherry')
 
                 }
 
@@ -726,6 +780,17 @@ function init() {
       }
     }
 
+
+  }
+
+  function addCherries() {
+
+    gridArray[2][1].cherry = true
+    gridArray[2][27].cherry = true
+    gridArray[26][1].cherry = true
+    gridArray[26][27].cherry = true
+
+    totalCherries = 4
 
   }
 
@@ -1093,6 +1158,18 @@ function init() {
 
   }
 
+  function playAudioOnce(audioLocation) {
+
+    audioCount += 1
+    const tempAudio = document.createElement('audio')
+    tempAudio.id = `audio-${audioCount}`
+    gameContainer.appendChild(tempAudio)
+    tempAudio.src = audioLocation
+    tempAudio.addEventListener('ended', deleteAudio)
+    tempAudio.play()
+
+  }
+
   function deleteAudio(e) {
 
     gameContainer.removeChild(e.target)
@@ -1169,6 +1246,7 @@ function init() {
   findCorners()
   findNearestCorners()
   addCoins()
+  addCherries()
   setGrid()
   updateLeaderboard()
   //updateGrid()

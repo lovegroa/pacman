@@ -206,10 +206,17 @@ button:hover {
   background-position: center;
   background-repeat: no-repeat;
   order: 1;
-
-  ;
-
 }
+
+.cherry {
+
+  background-image: url('/assets/cherry.png');
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  order: 1;
+}
+
 
 .right {
 
