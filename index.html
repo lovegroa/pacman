@@ -4,8 +4,14 @@
 <head>
   <meta charset="utf-8">
   <title>Pacman</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Goldman&family=Nunito&display=swap');
+  </style>
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="shortcut icon" href="#">
+
   <script src="scripts/app.js" charset="utf-8"></script>
+
 </head>
 
 <body>
@@ -13,16 +19,66 @@
 
     <div id="header-container">
 
-      Pacman
-      <button id="start-pause">Start</button>
-      <button>Reset</button>
+      <img id="pacman-logo" src="/assets/pacman-logo.png" alt="Pacman">
+      <div id="buttons">
+
+        <button id="start-pause">Start</button>
+        <button id="reset">Reset</button>
+        <button id="toggle-ghost-behaviour" title="Warning sets your score to 0">Toggle Ghost Mode</button>
+        <button id="toggle-path-data">Toggle Path Data</button>
+
+      </div>
+
+
 
 
     </div>
     <div id="middle-container">
 
+      <div id="end-game">
+        <h3>Game Over</h3>
+        <p>Your score is:</p>
+        <h2 id="end-game-score"></h2>
+
+        <form action="">
+          <input type="text" placeholder="Enter name" id="player-name" name="fname"><br>
+          <input type="submit" value="Submit">
+        </form>
+      </div>
+
       <div id='game-container'></div>
-      <div id="score-container"></div>
+      <div id="score-container">
+        <div id="game-stats">
+          <div id='score-box'>
+            <div id='score-box-left'>Score:</div>
+            <div id='score-box-right'><span id="score">0</span></div>
+          </div>
+          <div id='lives-box'>
+            <div id='lives-box-left'>Lives:</div>
+            <div id='lives-box-right'><span id="lives">0</span></div>
+          </div>
+
+        </div>
+        <div id='multiplier-box'>
+          <div id="multiplier-data">
+            <div id='multiplier-box-left'>Difficulty Multiplier:</div>
+            <div id='multiplier-box-right'><span id="multiplier">0</span></div>
+
+          </div>
+
+
+          <div class="slidecontainer">
+            <input type="range" min="0" max="100" value="50" step="10" class="slider" id="difficultySlider">
+          </div>
+
+        </div>
+
+        <div id="leaderboard">
+          <h1>Top 10</h1>
+          <div id="high-scores"></div>
+        </div>
+
+      </div>
 
     </div>
 

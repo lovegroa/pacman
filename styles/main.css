@@ -1,8 +1,7 @@
 
 html, body {
 
-height: 100%;
-margin: 0px;
+height: 99%;
 color:white;
 text-align: center;
 
@@ -13,6 +12,11 @@ body{
 display: flex;
 justify-content: center;
 align-items: center;
+background-image: url(/assets/background.jpeg);
+background-size: cover;
+background-position: center;
+font-family: 'Goldman', cursive;
+
 
 }
 
@@ -21,13 +25,18 @@ align-items: center;
   max-width: 800px;
   width: 70%;
   height: 80%;
+  display: flex;
+  flex-direction: column;
+
 
 
 }
 
+
+
 #header-container {
 
-  height: 20%;
+height: 200px
 
 }
 
@@ -44,29 +53,107 @@ align-items: center;
   display: grid;
   grid-template-columns: repeat(29, 1fr);
   grid-template-rows: repeat(29, 1fr);
-  background-color: black;
-
-
+  padding: 10px;
 
 }
 
 #score-container {
 
   width: 40%;
+  color: yellow;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
 }
 
+#pacman-logo{
+
+  height: 50%;
+  display: block;
+  padding: 2%;
+  margin: 0 auto;
+  align-self: center;
+
+}
+button{
+
+  height: 30%;
+  width: auto;
+  background-color: black;
+  border: 3px solid yellow;
+  color: yellow;
+  padding: 10px;
+  margin: 0;
+  font-family: inherit;
+
+}
+
+button:hover {
+  background-color: white;
+  color:black
+}
+
+#game-stats{
+  height: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: black;
+  border: 3px solid yellow;
+
+}
+
+#multiplier-data{
+
+  display: flex;
+  justify-content: space-between;
+  padding: 2%;
+
+}
+
+#multiplier-box {
+
+  /* display: flex;
+  flex-direction: column;
+  padding: 2%;
+  justify-content: space-between; */
+
+  height: auto;
+  align-items: center;
+  background-color: black;
+  border-left: 3px solid yellow;
+  border-right: 3px solid yellow;
+
+
+}
+
+
+
+#leaderboard{
+
+  height: max-content;
+  background-color: black;
+  border: 3px solid yellow;
+
+}
 
 .cell{
 
   grid-column-end: span 1;
   grid-row-end: span 1;
+  background-color: rgba(0, 0, 0, 0.55);
+  font-size: 60%;
 
 }
 
 .block{
 
-  background-color: blue;
+  background-color: rgba(0, 0, 255, 1);
+  
+  box-shadow:     
+  8px 8px black;  /* inner white */
+
 
 }
 
@@ -92,6 +179,34 @@ align-items: center;
   background-image: url('/assets/ghost1.gif');
   background-size: cover;
   background-position: center;
+
+}
+
+.ghost2 {
+
+  background-image: url('/assets/ghost2.gif');
+  background-size: cover;
+  background-position: center;
+
+}
+
+.ghost3 {
+
+  background-image: url('/assets/ghost3.gif');
+  background-size: cover;
+  background-position: center;
+
+}
+
+
+.coin {
+
+  background-image: url('/assets/coin.gif');
+  background-size: 30%;
+  background-position: center;
+  background-repeat: no-repeat;
+  order: 1;
+
   ;
 
 }
@@ -123,5 +238,204 @@ align-items: center;
 
 }
 
+#score-box, #lives-box  {
 
 
+  display: flex;
+  padding: 2%;
+  width: 50%;
+  justify-content: space-between;
+    
+
+
+}
+
+#end-game{
+
+  position: absolute;
+  display: none;
+  width: 0%;
+  height: 0%;
+  border: 0px solid black;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background-color: yellow;
+  color: black;
+  transition: width 2s, height 2s, background-color 2s, transform 2s;
+
+  z-index: 1;
+
+
+}
+
+input {
+  background: inherit;
+    font-family: inherit;
+    margin: 0px;
+    text-align: center;
+    border: none;
+    font-size: large;
+}
+
+input[type=submit] {
+  margin: 10px;
+  padding:5px 15px; 
+  background:black; 
+  border:0 none;
+  cursor:pointer;
+  border-radius: 5px;
+  color: yellow;
+}
+
+
+#score-box {
+
+  border-right: 1px solid yellow;
+
+}
+
+#lives-box {
+
+  border-left: 1px solid yellow;
+}
+
+#high-scores {
+
+  padding: 10px;
+  margin: 30px;
+
+
+}
+
+@media (max-width: 600px) {
+
+  #main-container {
+
+    width: 90%;
+
+  }
+  
+  #middle-container{
+flex-direction: column;	
+}
+
+  #game-container{
+
+  height: 70%;
+  width: 100%;
+  padding: 0;
+
+  }
+
+  #score-container{
+
+    margin-top: 20px;
+    width: 100%;
+    height: 30%;
+
+  }
+
+  #game-stats{
+
+    height: 30%;
+
+  }
+
+
+
+
+
+}
+
+/* range slider styling below I used this tool to help as I couldn't get anything to work https://www.cssportal.com/style-input-range/*/
+
+input[type=range] {
+  height: 40px;
+  -webkit-appearance: none;
+  margin: 10px 0;
+  width: 90%;
+  background: black
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000;
+  background: #FFF000;
+  border-radius: 15px;
+  border: 2px solid #000000;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000;
+  border: 3px solid #000000;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background: #FFF000;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -12.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #FFF000;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000;
+  background: #FFF000;
+  border-radius: 15px;
+  border: 2px solid #000000;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000000;
+  border: 3px solid #000000;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background: #FFF000;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #FFF000;
+  border: 2px solid #000000;
+  border-radius: 30px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-fill-upper {
+  background: #FFF000;
+  border: 2px solid #000000;
+  border-radius: 30px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-thumb {
+  margin-top: 1px;
+  box-shadow: 1px 1px 1px #000000;
+  border: 3px solid #000000;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background: #FFF000;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #FFF000;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #FFF000;
+}

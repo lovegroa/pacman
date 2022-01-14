@@ -4,18 +4,22 @@ function init() {
 
   class Sprite {
 
-    constructor(name, type, behaviour, controller, nextMove, row, col) {
+    constructor(name, type, behaviour, controller, nextMove, row, col, delayTime) {
       this.name = name
       this.type = type
       this.behaviour = behaviour
       this.controller = controller
       this.nextMove = nextMove
+      this.delayTime = delayTime
       this.row = row
       this.col = col
       this.rowMomentum = 0
       this.colMomentum = 0
       this.currentMove
-
+      this.totalScore = 0
+      this.lives = 3
+      this.delay = true
+      sprites.push(this)
 
     }
 
@@ -25,6 +29,7 @@ function init() {
       let tunnel = false
       this.rowMomentum = 0
       this.colMomentum = 0
+
 
       //this moves the sprite at the next interval using the latest keystroke, if possible
 
@@ -81,14 +86,68 @@ function init() {
 
       }
 
-      this.currentMove === 'right' & tunnel ? gridArray[this.row][28][this.type] = false : gridArray[this.row][this.col][this.type] = false
-      this.currentMove === 'left' & tunnel ? gridArray[this.row][0][this.type] = false : gridArray[this.row][this.col][this.type] = false
+      this.currentMove === 'right' & tunnel ? gridArray[this.row][28][this.name] = false : gridArray[this.row][this.col][this.name] = false
+      this.currentMove === 'left' & tunnel ? gridArray[this.row][0][this.name] = false : gridArray[this.row][this.col][this.name] = false
+
+      this.previousRow = this.row
+      this.previousCol = this.col
 
       this.row += this.rowMomentum
       this.col += this.colMomentum
 
       gridArray[this.row][this.col]['direction'] = this.currentMove
-      gridArray[this.row][this.col][this.type] = true
+      gridArray[this.previousRow][this.previousCol]['direction'] = 'right'
+      gridArray[this.row][this.col][this.name] = true
+
+    }
+
+    score(points) {
+
+      playAudio('assets/audio/coin.wav')
+      this.totalScore += points * difficulty.value * cheat
+      scoreSpan.innerText = this.totalScore
+      updateLeaderboard()
+
+    }
+
+    capture() {
+
+      gridArray[this.row][this.col][this.name] = false
+      this.lives -= 1
+      this.row = 14
+      this.col = 0
+      this.currentMove = 'right'
+      this.nextMove = 'right'
+
+      sprites.forEach(sprite => {
+
+        sprite.run()
+
+
+      })
+
+      if (this.lives > 0) {
+
+        livesSpan.innerText = this.lives
+        playAudio('assets/audio/die.wav')
+
+
+      } else {
+
+        endGame()
+      }
+
+    }
+
+    run() {
+
+      this.behaviour = 'run'
+
+      setTimeout(() => {
+
+        this.behaviour = 'chase'
+
+      }, 1000 * 5)
 
     }
 
@@ -99,17 +158,45 @@ function init() {
   const gameContainer = document.querySelector('#game-container')
   const rows = 29
   const cols = 29
+  const fps = 5
+  const fpsTime = 1000 / fps
   const gridArray = [[]]
   const blockIdArray = []
   const startPauseBtn = document.querySelector('#start-pause')
+  const ghostBehaviourBtn = document.querySelector('#toggle-ghost-behaviour')
+  const pathDataBtn = document.querySelector('#toggle-path-data')
+  const scoreSpan = document.querySelector('#score')
+  const livesSpan = document.querySelector('#lives')
+  const difficulty = document.querySelector('#difficultySlider')
+  const highScores = document.querySelector('#high-scores')
+  // const playerName = window.prompt('What is your name?')
+  let playerName = 'Current Score'
+  let audioCount = 0
+  let totalCoins = 0
+  let cheat = 1
+
+
+  if (!localStorage.getItem('scores')) {
+
+    localStorage.setItem('scores', '[]')
+
+  }
+
+  let showPathData = false
+
   let isRunning = false
   let frame
   const sprites = []
-  const pacman = new Sprite('pacman', 'pacman', 'run', 'player', 'null', 13, 18)
-  sprites.push(pacman)
-  const ghost1 = new Sprite('ghost1', 'ghost1', 'chase', 'computer', 'null', 14, 14)
-  sprites.push(ghost1)
-  const allCorners = []
+
+  const pacman = new Sprite('pacman', 'pacman', 'run', 'player', 'null', 14, 0, 0)
+  new Sprite('ghost1', 'ghost', 'chase', 'computer', 'null', 14, 14, 2)
+  new Sprite('ghost2', 'ghost', 'chase', 'computer', 'null', 14, 14, 4)
+  new Sprite('ghost3', 'ghost', 'chase', 'computer', 'null', 14, 14, 8)
+  new Sprite('ghost1', 'ghost', 'chase', 'computer', 'null', 14, 14, 10)
+
+
+
+  let allCorners = []
 
   //Functions
 
@@ -198,7 +285,7 @@ function init() {
         sprites.forEach(sprite => {
 
           if (row === sprite.row && col === sprite.col) {
-            tempCell.classList.add(sprite.type)
+            tempCell.classList.add(sprite.name)
           }
 
         })
@@ -233,7 +320,7 @@ function init() {
 
         sprites.forEach(sprite => {
 
-          gridArray[row][col][sprite.type] = false
+          gridArray[row][col][sprite.name] = false
 
         })
 
@@ -256,14 +343,14 @@ function init() {
 
     sprites.forEach(sprite => {
 
-      gridArray[sprite.row][sprite.col][sprite.type] = true
+      gridArray[sprite.row][sprite.col][sprite.name] = true
 
     })
 
   }
 
-  function updateGrid() {
 
+  function setGrid() {
 
     for (let row = 0; row < rows; row++) {
 
@@ -275,18 +362,120 @@ function init() {
 
             sprites.forEach(sprite => {
 
-              gridArray[row][col][sprite.type] ? cell.classList.add(sprite.type) : cell.classList.remove(sprite.type)
+              gridArray[row][col][sprite.name] ? cell.classList.add(sprite.name) : cell.classList.remove(sprite.name)
 
             })
 
-            gridArray[row][col].cornerValue ? cell.innerText = gridArray[row][col].cornerValue : gridArray[row][col].cornerValue = ''
-            cell.innerText = gridArray[row][col].cornerValue
+            gridArray[row][col].block ? cell.classList.add('block') : cell.classList.remove('block')
+            gridArray[row][col].coin ? cell.classList.add('coin') : cell.classList.remove('coin')
+
+
+
+          }
+
+        })
+
+      }
+
+    }
+
+  }
+
+  function updateGrid() {
+
+    pathFind(pacman.row, pacman.col)
+
+
+
+    moveGhost()
+
+
+
+
+    for (let row = 0; row < rows; row++) {
+
+      for (let col = 0; col < cols; col++) {
+
+        cells.forEach(cell => {
+
+          if (cell.id === `r${row}-c${col}`) {
+
+            //displays the sprite on each frame
+
+            sprites.forEach(sprite => {
+
+              if (sprite.type === 'ghost') {
+
+
+                if (gridArray[row][col][sprite.name] && gridArray[row][col].pacman) {
+
+                  pacman.capture()
+
+                } else if (sprite.previousCol === pacman.col && sprite.previousRow === pacman.row && pacman.previousCol === sprite.col && sprite.previousRow === pacman.row) {
+
+                  //prevents issue where pacman and ghost are moving in opposite directions and don't actually land on the same cell at the same time but cross paths!
+                  //this checks to see if they have simply switched positions, which means they must have passed
+                  pacman.capture()
+
+                }
+              }
+
+            })
+
+
+
+            sprites.forEach(sprite => {
+
+              gridArray[row][col][sprite.name] ? cell.classList.add(sprite.name) : cell.classList.remove(sprite.name)
+
+            })
+
+
+            if (gridArray[row][col].cornerValue && gridArray[row][col].isCorner) cell.innerText = gridArray[row][col].cornerValue
+            if (!showPathData) cell.innerText = ''
+
             gridArray[row][col].direction === 'right' ? cell.classList.add('right') : cell.classList.remove('right')
             gridArray[row][col].direction === 'left' ? cell.classList.add('left') : cell.classList.remove('left')
             gridArray[row][col].direction === 'up' ? cell.classList.add('up') : cell.classList.remove('up')
             gridArray[row][col].direction === 'down' ? cell.classList.add('down') : cell.classList.remove('down')
 
-            gridArray[row][col].block ? cell.classList.add('block') : cell.classList.remove('block')
+            //when pacman eats a coin
+
+            if (gridArray[row][col].pacman && gridArray[row][col].coin) {
+
+              cell.classList.remove('coin')
+              gridArray[row][col].coin = false
+              totalCoins -= 1
+              pacman.score(100)
+
+            }
+
+            if (totalCoins === 0) addCoins()
+
+            if (gridArray[row][col].coin) cell.classList.add('coin')
+
+            sprites.forEach(sprite => {
+
+              if (sprite.type === 'ghost') {
+
+                if (gridArray[row][col][sprite.name] && gridArray[row][col].coin) {
+
+                  cell.classList.remove('coin')
+
+                }
+
+
+
+
+              }
+
+
+            })
+
+
+
+
+
 
 
           }
@@ -321,42 +510,124 @@ function init() {
 
       pacman.nextMove = 'right'
 
-    } else if (e.keyCode === 87) {
-
-
-      ghost1.nextMove = 'up'
-
-    } else if (e.keyCode === 83) {
-
-
-      ghost1.nextMove = 'down'
-
-    } else if (e.keyCode === 65) {
-
-
-      ghost1.nextMove = 'left'
-
-    } else if (e.keyCode === 68) {
-
-
-      ghost1.nextMove = 'right'
-
     }
   }
+
+  function moveGhost() {
+
+    const randNum = Math.random()
+    const difficultyNo = randNum * difficulty.value
+
+    sprites.forEach(sprite => {
+
+
+
+      let min = 1000
+      let max = 0
+
+      if (sprite.type === 'ghost') {
+
+        if (!sprite.delay) {
+
+
+          if (gridArray[sprite.row][sprite.col].isCorner) {
+
+
+            if (difficultyNo < 10 && difficulty.value !== 100) {
+
+              const corners = gridArray[sprite.row][sprite.col].corners
+
+              sprite.nextMove = corners[Math.floor(Math.random() * corners.length)].direction
+
+            } else {
+
+              gridArray[sprite.row][sprite.col].corners.forEach(corner => {
+
+                // console.log(corner, gridArray[corner.row][corner.col].cornerValue)
+
+                if (sprite.behaviour === 'chase') {
+
+                  if (gridArray[corner.row][corner.col].cornerValue < min) {
+
+                    min = gridArray[corner.row][corner.col].cornerValue
+                    sprite.nextMove = corner.direction
+
+                  }
+
+
+                } else {
+
+                  if (gridArray[corner.row][corner.col].cornerValue > max) {
+
+                    max = gridArray[corner.row][corner.col].cornerValue
+                    sprite.nextMove = corner.direction
+
+                  }
+
+
+                }
+
+              })
+
+            }
+
+          }
+
+        }
+
+
+
+
+
+      }
+
+
+    })
+
+
+
+
+
+
+
+  }
+
+  let chaseMusic
+  let waka
 
   function startPause() {
 
     if (isRunning) {
 
+      stopAudio(chaseMusic)
+      stopAudio(waka)
       clearInterval(frame)
       startPauseBtn.innerHTML = 'Resume'
       isRunning = false
 
     } else {
 
+      chaseMusic = repeatAudio('/assets/audio/chase.wav')
+      waka = repeatAudio('/assets/audio/waka.mp3')
+
       startTimer()
       startPauseBtn.innerHTML = 'Pause'
       isRunning = true
+
+      sprites.forEach(sprite => {
+
+        if (sprite.delay) {
+
+          setTimeout(() => {
+
+            console.log(sprite.delayTime)
+            sprite.delay = false
+
+          }, sprite.delayTime * 1000)
+
+        }
+
+      })
 
     }
 
@@ -373,7 +644,7 @@ function init() {
       )
       updateGrid()
 
-    }, 5)
+    }, fpsTime)
 
   }
 
@@ -413,6 +684,10 @@ function init() {
           if (cornerCount > 2) {
             gridArray[row][col].isCorner = true
             allCorners.push([row, col])
+          } else if (cornerCount === 1) {
+
+            gridArray[row][col].isCorner = false
+
           } else if (!((up && down) || (left && right))) {
 
             gridArray[row][col].isCorner = true
@@ -426,9 +701,31 @@ function init() {
     }
 
 
+    allCorners = Array.from(new Set(allCorners))
+
     //identify which corners are connected
 
     //loop through all corners to find shortest node value  
+
+  }
+
+  function addCoins() {
+
+    for (let row = 0; row < rows; row++) {
+
+      for (let col = 0; col < cols; col++) {
+
+        if (!(gridArray[row][col].block || row % 2 === 0)) {
+
+          gridArray[row][col].coin = true
+          totalCoins += 1
+
+        }
+
+
+      }
+    }
+
 
   }
 
@@ -541,14 +838,11 @@ function init() {
 
   function measureCorners() {
 
-    // console.log(allCorners[0])
 
     let allCornersValue = false
-    let runCount = 0
 
     while (!allCornersValue) {
-      runCount += 1
-      console.log('the while loop has run:', runCount)
+
 
 
       allCornersValue = true
@@ -559,43 +853,48 @@ function init() {
 
         //checks to see if the current cell has a value
 
-        if (!tempCorner.cornerValue) {
+        if (tempCorner.cornerValue === 1000) {
 
           allCornersValue = false
 
-          // if not it is set the lowest value of the connecting corners plus the distance if they have a value
-          let min = 1000
-          tempCorner.corners.forEach(tempCorner2 => {
+        }
 
-            //checks to see if those corners have a value
+        // if not it is set the lowest value of the connecting corners plus the distance if they have a value
+        let min = 1000
+        tempCorner.corners.forEach(tempCorner2 => {
 
-            if (gridArray[tempCorner2.row][tempCorner2.col].cornerValue) {
+          //checks to see if those corners have a value
 
-              //if they do and it's smaller than the min then the min is updated with that value plus distance
+          if (gridArray[tempCorner2.row][tempCorner2.col].cornerValue) {
 
-              if (((gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance) < min)) {
+            //if they do and it's smaller than the min then the min is updated with that value plus distance
 
-                min = gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance
+            if (((gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance) < min)) {
 
-              }
-
+              min = gridArray[tempCorner2.row][tempCorner2.col].cornerValue + tempCorner2.distance
 
             }
 
 
+          }
 
-          })
 
-          //then the min value is added as that corner value
 
-          if (min !== 1000) tempCorner.cornerValue = min
-          // console.log(`Corner value added to ${corner[0]}:${corner[1]} of ${tempCorner.cornerValue}`)
+        })
+        // if (corner[0] === 27 && corner[1] === 27) console.log('line27', min)
+        //then the min value is added as that corner value
+        if (tempCorner.cornerValue > min) tempCorner.cornerValue = min
+        // if (min !== 1000) tempCorner.cornerValue = min
+        // console.log(`Corner value added to ${corner[0]}:${corner[1]} of ${tempCorner.cornerValue}`)
 
-        }
 
       })
 
+
+
     }
+
+
 
     allCorners.forEach(corner => {
 
@@ -631,7 +930,7 @@ function init() {
         //then the min value is added as that corner value
 
         tempCorner.cornerValue = min
-        console.log(`Corner value added to ${tempCorner.row}:${tempCorner.col} of ${tempCorner.cornerValue}`)
+        // console.log(`Corner value added to ${tempCorner.row}:${tempCorner.col} of ${tempCorner.cornerValue}`)
 
 
 
@@ -643,12 +942,32 @@ function init() {
 
   function pathFind(endRow, EndCol) {
 
+    allCorners.forEach(corner => {
+
+      // console.log(corner[0], corner[1])
+
+      gridArray[corner[0]][corner[1]].cornerValue = 1000
+
+    })
+
     //adds the first node values to the corners nearest the end coords
+
+    //if (gridArray[endRow][EndCol].isCorner) {
+
+
+    gridArray[endRow][EndCol].cornerValue = 1 //not sure what's going on here, I set this value to 0
+    // console.log(gridArray[endRow][EndCol]) // and then when I look here it's set to cornerValue = ""
+    //}
+
+
+
+    // console.log(`Corner value added to ${endRow}:${EndCol} of 0`)
+
 
     gridArray[endRow][EndCol].corners.forEach(corner => {
 
       gridArray[corner.row][corner.col].cornerValue = corner.distance
-      console.log(`Corner value added to ${corner.row}:${corner.col} of ${corner.distance}`)
+      // console.log(`Corner value added to ${corner.row}:${corner.col} of ${corner.distance}`)
 
 
     })
@@ -656,22 +975,205 @@ function init() {
 
     measureCorners()
 
+    // console.log(gridArray[pacman.row][pacman.col])
+
+
   }
+
+  function toggleGhost() {
+
+    cheat = 0
+
+    sprites.forEach(sprite => {
+
+      if (sprite.type === 'ghost') {
+
+        sprite.behaviour === 'run' ? sprite.behaviour = 'chase' : sprite.behaviour = 'run'
+
+        console.log(sprite.behaviour)
+
+      }
+
+    })
+
+
+
+  }
+
+  function showPathDataF() {
+
+    showPathData ? showPathData = false : showPathData = true
+
+  }
+
+  function saveLeaderboard() {
+
+    const tempHighScores = JSON.parse(localStorage.getItem('scores'))
+    tempHighScores.push([pacman.totalScore, playerName])
+
+    localStorage.setItem('scores', JSON.stringify(tempHighScores))
+
+  }
+
+  function endGame() {
+
+    playAudio('/assets/audio/dead.wav')
+    document.querySelector('#end-game-score').innerText = pacman.totalScore
+    endGameScreen.style.display = 'block'
+    endGameScreen.style.border = '30px solid black'
+    endGameScreen.style.width = '30%'
+    endGameScreen.style.height = '30%'
+    livesSpan.innerText = 0
+    startPauseBtn.click()
+    startPauseBtn.style.display = 'none'
+    startPauseBtn.disabled = true
+
+  }
+
+  function updateLeaderboard() {
+
+    //local storage can only store strings this turns it into an object
+
+    const scores = JSON.parse(localStorage.getItem('scores'))
+
+    // scores.push(pacman.totalScore)
+    // localStorage.setItem('scores')
+    scores.push([pacman.totalScore, playerName])
+
+    scores.sort(sortFunction)
+    highScores.innerHTML = ''
+
+    let count = 0
+
+    scores.forEach(score => {
+
+      if (count < 10) {
+
+        highScores.innerHTML += `${score[1]} : ${score[0]} <br>`
+        count += 1
+
+
+      }
+
+
+    })
+
+
+
+  }
+
+  function sortFunction(a, b) {
+
+    //sort function based on first index in a two dimensional array
+
+    if (a[0] === b[0]) {
+      return 0
+    } else {
+      return (a[0] > b[0]) ? -1 : 1
+    }
+  }
+
+  function playAudio(audioLocation) {
+
+    audioCount += 1
+    const tempAudio = document.createElement('audio')
+    tempAudio.id = `audio-${audioCount}`
+    gameContainer.appendChild(tempAudio)
+    tempAudio.src = audioLocation
+    tempAudio.addEventListener('ended', deleteAudio)
+
+    tempAudio.onloadedmetadata = function () {
+      console.log(tempAudio.duration * 1000)
+      const playbackSpeed = (tempAudio.duration * 1000) / fpsTime
+      console.log(playbackSpeed)
+      tempAudio.playbackRate = playbackSpeed
+    }
+
+    tempAudio.play()
+
+  }
+
+  function deleteAudio(e) {
+
+    gameContainer.removeChild(e.target)
+
+  }
+
+  function repeatAudio(audioLocation) {
+
+    audioCount += 1
+    const tempAudio = document.createElement('audio')
+    tempAudio.id = `audio-${audioCount}`
+    gameContainer.appendChild(tempAudio)
+    tempAudio.src = audioLocation
+    tempAudio.loop = true
+    tempAudio.play()
+    return tempAudio
+
+  }
+
+  function stopAudio(element) {
+
+    element.pause()
+    gameContainer.removeChild(element)
+
+  }
+
+  function updateMultiplier() {
+
+    document.querySelector('#multiplier').innerText = difficulty.value
+
+  }
+
+  function submitScore(e) {
+
+    e.preventDefault()
+    playerName = document.querySelector('#player-name').value
+
+    endGameScreen.style.display = 'none'
+    endGameScreen.style.border = '0px solid black'
+    endGameScreen.style.width = '0%'
+    endGameScreen.style.height = '0%'
+
+    saveLeaderboard()
+  }
+
+  function resetGame() {
+
+    location.reload()
+
+  }
+
+  const form = document.querySelector('form')
+  form.addEventListener('submit', submitScore)
+  const endGameScreen = document.querySelector('#end-game')
+  const resetBtn = document.querySelector('#reset')
+
 
   //End Functions
 
   document.addEventListener('keydown', logKey)
   addBlockIds()
   startPauseBtn.addEventListener('click', startPause)
+  ghostBehaviourBtn.addEventListener('click', toggleGhost)
+  pathDataBtn.addEventListener('click', showPathDataF)
+  difficulty.addEventListener('change', updateMultiplier)
+  resetBtn.addEventListener('click', resetGame)
+
+  livesSpan.innerText = pacman.lives
+
+  updateMultiplier()
   createGrid()
   const cells = document.querySelectorAll('.cell')
   createGridArray()
   findCorners()
   findNearestCorners()
-  pathFind(pacman.row, pacman.col)
-  updateGrid()
+  addCoins()
+  setGrid()
+  updateLeaderboard()
+  //updateGrid()
 
-  console.log(gridArray[0][0])
+  // console.log(gridArray[23][27])
 
 }
 
