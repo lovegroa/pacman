@@ -661,8 +661,8 @@ function init() {
 
     } else {
 
-      chaseMusic = repeatAudio('/assets/audio/chase.wav')
-      waka = repeatAudio('/assets/audio/waka.mp3')
+      chaseMusic = repeatAudio('assets/audio/chase.wav')
+      waka = repeatAudio('assets/audio/waka.mp3')
 
       startTimer()
       startPauseBtn.innerHTML = 'Pause'
@@ -1082,7 +1082,7 @@ function init() {
 
   function endGame() {
 
-    playAudio('/assets/audio/dead.wav')
+    playAudio('assets/audio/dead.wav')
     document.querySelector('#end-game-score').innerText = pacman.totalScore
     endGameScreen.style.display = 'block'
     endGameScreen.style.border = '30px solid black'

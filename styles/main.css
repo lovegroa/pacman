@@ -166,7 +166,7 @@ button:hover {
 
 .pacman {
 
-  background-image: url('/assets/pacman.gif');
+  background-image: url('assets/pacman.gif');
   background-size: cover;
   background-position: center;
   ;
@@ -176,7 +176,7 @@ button:hover {
 
 .ghost1 {
 
-  background-image: url('/assets/ghost1.gif');
+  background-image: url('assets/ghost1.gif');
   background-size: cover;
   background-position: center;
 
@@ -184,7 +184,7 @@ button:hover {
 
 .ghost2 {
 
-  background-image: url('/assets/ghost2.gif');
+  background-image: url('assets/ghost2.gif');
   background-size: cover;
   background-position: center;
 
@@ -192,7 +192,7 @@ button:hover {
 
 .ghost3 {
 
-  background-image: url('/assets/ghost3.gif');
+  background-image: url('assets/ghost3.gif');
   background-size: cover;
   background-position: center;
 
@@ -201,7 +201,7 @@ button:hover {
 
 .coin {
 
-  background-image: url('/assets/coin.gif');
+  background-image: url('assets/coin.gif');
   background-size: 30%;
   background-position: center;
   background-repeat: no-repeat;
@@ -210,7 +210,7 @@ button:hover {
 
 .cherry {
 
-  background-image: url('/assets/cherry.png');
+  background-image: url('assets/cherry.png');
   background-size: 100%;
   background-position: center;
   background-repeat: no-repeat;
