@@ -208,6 +208,16 @@ function init() {
 
   }
 
+  if (!localStorage.getItem('difficulty')) {
+
+    localStorage.setItem('difficulty', '60')
+
+  } else {
+
+    difficulty.value = parseInt(localStorage.getItem('difficulty'))
+
+  }
+
   let showPathData = false
 
   let isRunning = false
@@ -1199,6 +1209,7 @@ function init() {
   function updateMultiplier() {
 
     document.querySelector('#multiplier').innerText = difficulty.value
+    localStorage.setItem('difficulty', String(difficulty.value))
 
   }
 
@@ -1213,6 +1224,9 @@ function init() {
     endGameScreen.style.height = '0%'
 
     saveLeaderboard()
+
+    resetBtn.click()
+
   }
 
   function resetGame() {
@@ -1225,6 +1239,7 @@ function init() {
   form.addEventListener('submit', submitScore)
   const endGameScreen = document.querySelector('#end-game')
   const resetBtn = document.querySelector('#reset')
+
 
 
   //End Functions
